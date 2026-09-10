@@ -27,4 +27,16 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleCustomerNotFound(CustomerNotFoundException exception){
         return Map.of("message", exception.getMessage());
     }
+
+    @ExceptionHandler(SaleNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleSaleNotFound(SaleNotFoundException exception){
+        return Map.of("message", exception.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleInsufficientStock(InsufficientStockException exception){
+        return Map.of("message", exception.getMessage());
+    }
 }
