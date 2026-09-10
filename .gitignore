@@ -24,3 +24,15 @@ hs_err_pid*
 replay_pid*
 
 .DS_Store
+
+# Environment files
+.env
+*.env
+
+# Maven build output
+target/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
