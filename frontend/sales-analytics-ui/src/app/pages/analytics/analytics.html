@@ -32,35 +32,97 @@
   <div class="charts-grid">
 
     <div class="chart-card">
+
       <div class="chart-header">
         <h2>Revenue Overview</h2>
         <p>Revenue generated from each sale</p>
       </div>
 
       <div class="chart-container">
+
         <canvas
           baseChart
           [data]="revenueChartData"
           [options]="revenueChartOptions"
           type="bar">
         </canvas>
+
       </div>
+
     </div>
 
     <div class="chart-card">
+
       <div class="chart-header">
         <h2>Orders Overview</h2>
         <p>Number of orders</p>
       </div>
 
       <div class="chart-container">
+
         <canvas
           baseChart
           [data]="ordersChartData"
           [options]="ordersChartOptions"
           type="line">
         </canvas>
+
       </div>
+
+    </div>
+
+  </div>
+
+  <div class="best-selling-section">
+
+    <div class="chart-header">
+      <h2>Best-Selling Products</h2>
+      <p>Products with the highest sales quantity</p>
+    </div>
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity Sold</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr
+            *ngFor="let product of bestSellingProducts">
+
+            <td>
+              {{ product.productName }}
+            </td>
+
+            <td>
+              {{ product.quantitySold }}
+            </td>
+
+            <td>
+              ₹{{ product.revenue | number:'1.2-2' }}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <p
+        class="empty-message"
+        *ngIf="bestSellingProducts.length === 0">
+
+        No product sales available.
+
+      </p>
+
     </div>
 
   </div>

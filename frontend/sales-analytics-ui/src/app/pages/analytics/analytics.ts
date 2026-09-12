@@ -14,10 +14,18 @@ import {
 } from 'chart.js';
 
 import { AnalyticsService } from '../../services/analytics';
+
 import {
   SalesService,
-  Sale
+  Sale,
+  Product
 } from '../../services/sales';
+
+interface BestSellingProduct {
+  productName: string;
+  quantitySold: number;
+  revenue: number;
+}
 
 @Component({
   selector: 'app-analytics',
@@ -35,6 +43,10 @@ export class Analytics implements OnInit {
   orders = 0;
   productsSold = 0;
   averageOrderValue = 0;
+
+  products: Product[] = [];
+
+  bestSellingProducts: BestSellingProduct[] = [];
 
   revenueChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
@@ -104,6 +116,7 @@ export class Analytics implements OnInit {
   ngOnInit(): void {
     this.loadAnalyticsData();
     this.loadCharts();
+    this.loadBestSellingProducts();
   }
 
   loadAnalyticsData(): void {
@@ -139,7 +152,6 @@ export class Analytics implements OnInit {
         console.error('Products sold error:', error);
       }
     });
-
   }
 
   calculateAverageOrderValue(): void {
@@ -158,8 +170,8 @@ export class Analytics implements OnInit {
           new Date(sale.saleDate).toLocaleDateString()
         );
 
-        const revenueData = sales.map((sale) =>
-          sale.totalAmount
+        const revenueData = sales.map(
+          (sale) => sale.totalAmount
         );
 
         const ordersData = sales.map(() => 1);
@@ -196,6 +208,81 @@ export class Analytics implements OnInit {
         console.error('Sales chart error:', error);
       }
     });
+  }
 
+  loadBestSellingProducts(): void {
+
+    this.salesService.getProducts().subscribe({
+      next: (products: Product[]) => {
+        this.products = products;
+
+        this.salesService.getSales().subscribe({
+          next: (sales: Sale[]) => {
+
+            const productMap =
+              new Map<number, BestSellingProduct>();
+
+            sales.forEach((sale) => {
+
+              sale.saleItems.forEach((item) => {
+
+                const existingProduct =
+                  productMap.get(item.productId);
+
+                const product =
+                  this.products.find(
+                    (product) =>
+                      product.id === item.productId
+                  );
+
+                const productName =
+                  product?.name ??
+                  `Product #${item.productId}`;
+
+                if (existingProduct) {
+
+                  existingProduct.quantitySold +=
+                    item.quantity;
+
+                  existingProduct.revenue +=
+                    item.subtotal;
+
+                } else {
+
+                  productMap.set(item.productId, {
+                    productName,
+                    quantitySold: item.quantity,
+                    revenue: item.subtotal
+                  });
+
+                }
+              });
+            });
+
+            this.bestSellingProducts =
+              Array.from(productMap.values())
+                .sort(
+                  (a, b) =>
+                    b.quantitySold - a.quantitySold
+                )
+                .slice(0, 5);
+
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            console.error(
+              'Best-selling sales error:',
+              error
+            );
+          }
+        });
+      },
+      error: (error) => {
+        console.error(
+          'Best-selling products error:',
+          error
+        );
+      }
+    });
   }
 }

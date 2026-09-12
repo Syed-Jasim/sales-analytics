@@ -21,8 +21,6 @@
   font-size: 14px;
 }
 
-/* Summary cards */
-
 .cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -66,8 +64,6 @@
   background: linear-gradient(135deg, #ea580c, #c2410c);
 }
 
-/* Charts */
-
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -106,9 +102,58 @@
   height: 320px;
 }
 
-/* Responsive design */
+.best-selling-section {
+  margin-top: 24px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+}
+
+th,
+td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+td {
+  color: #334155;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+.empty-message {
+  margin: 20px 0 0;
+  color: #64748b;
+  text-align: center;
+}
 
 @media (max-width: 1100px) {
+
   .cards {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -116,9 +161,11 @@
   .charts-grid {
     grid-template-columns: 1fr;
   }
+
 }
 
 @media (max-width: 600px) {
+
   .analytics-page {
     padding: 16px;
   }
@@ -143,4 +190,14 @@
   .chart-container {
     height: 260px;
   }
+
+  .best-selling-section {
+    padding: 16px;
+  }
+
+  th,
+  td {
+    padding: 12px;
+  }
+
 }
