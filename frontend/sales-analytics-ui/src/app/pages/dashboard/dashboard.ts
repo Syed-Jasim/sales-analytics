@@ -1,9 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AnalyticsService } from '../../services/analytics';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -12,6 +14,7 @@ export class Dashboard implements OnInit {
   revenue = 0;
   orders = 0;
   productsSold = 0;
+  averageOrderValue = 0;
 
   constructor(
     private analyticsService: AnalyticsService,
@@ -25,37 +28,35 @@ export class Dashboard implements OnInit {
   loadDashboardData(): void {
 
     this.analyticsService.getRevenue().subscribe({
-      next: (value: number) => {
-        console.log('Revenue:', value);
-        this.revenue = value;
+      next: (data) => {
+        this.revenue = data;
+        this.calculateAverageOrderValue();
         this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Revenue error:', error);
       }
     });
 
     this.analyticsService.getOrders().subscribe({
-      next: (value: number) => {
-        console.log('Orders:', value);
-        this.orders = value;
+      next: (data) => {
+        this.orders = data;
+        this.calculateAverageOrderValue();
         this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Orders error:', error);
       }
     });
 
     this.analyticsService.getProductsSold().subscribe({
-      next: (value: number) => {
-        console.log('Products sold:', value);
-        this.productsSold = value;
+      next: (data) => {
+        this.productsSold = data;
         this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Products sold error:', error);
       }
     });
 
+  }
+
+  calculateAverageOrderValue(): void {
+    if (this.orders > 0) {
+      this.averageOrderValue = this.revenue / this.orders;
+    } else {
+      this.averageOrderValue = 0;
+    }
   }
 }
