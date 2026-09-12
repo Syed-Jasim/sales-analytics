@@ -5,9 +5,16 @@ import { Observable } from 'rxjs';
 export interface Product {
   id: number;
   name: string;
-  category: string;
+  sku: string;
   price: number;
-  stock: number;
+  stockQuantity: number;
+  active: boolean;
+  categoryId: number;
+}
+
+export interface Category {
+  id: number;
+  name: string;
 }
 
 @Injectable({
@@ -15,11 +22,16 @@ export interface Product {
 })
 export class ProductsService {
 
-  private readonly apiUrl = 'http://localhost:8080/api/products';
+  private readonly productsUrl = 'http://localhost:8080/api/products';
+  private readonly categoriesUrl = 'http://localhost:8080/api/categories';
 
   constructor(private http: HttpClient) {}
 
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+    return this.http.get<Product[]>(this.productsUrl);
+  }
+
+  getCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(this.categoriesUrl);
   }
 }

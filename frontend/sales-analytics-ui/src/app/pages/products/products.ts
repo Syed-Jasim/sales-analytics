@@ -1,13 +1,9 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnInit,
-  ChangeDetectorRef
-} from '@angular/core';
-
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import {
   ProductsService,
-  Product
+  Product,
+  Category
 } from '../../services/products';
 
 @Component({
@@ -20,6 +16,7 @@ import {
 export class Products implements OnInit {
 
   products: Product[] = [];
+  categories: Category[] = [];
 
   loading = false;
   errorMessage = '';
@@ -31,6 +28,7 @@ export class Products implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCategories();
   }
 
   loadProducts(): void {
@@ -41,22 +39,41 @@ export class Products implements OnInit {
       next: (data: Product[]) => {
         this.products = data;
         this.loading = false;
-
         this.cdr.detectChanges();
       },
 
-      error: (error) => {
+      error: (error: any) => {
         console.error('Products API error:', error);
-
         this.loading = false;
         this.errorMessage = 'Unable to load products';
-
         this.cdr.detectChanges();
       }
     });
   }
 
+  loadCategories(): void {
+    this.productsService.getCategories().subscribe({
+      next: (data: Category[]) => {
+        this.categories = data;
+        this.cdr.detectChanges();
+      },
+
+      error: (error: any) => {
+        console.error('Categories API error:', error);
+      }
+    });
+  }
+
+  getCategoryName(categoryId: number): string {
+    const category = this.categories.find(
+      category => category.id === categoryId
+    );
+
+    return category ? category.name : 'No Category';
+  }
+
   refreshProducts(): void {
     this.loadProducts();
+    this.loadCategories();
   }
 }

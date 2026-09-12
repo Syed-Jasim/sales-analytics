@@ -55,7 +55,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 650px;
+  min-width: 950px;
 }
 
 thead {
@@ -68,6 +68,7 @@ th {
   color: #1e40af;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 td {
@@ -81,17 +82,31 @@ tbody tr:hover {
   background-color: #f8fafc;
 }
 
-.stock-badge {
+.stock-badge,
+.status-badge {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 20px;
-  background-color: #dcfce7;
-  color: #166534;
   font-size: 12px;
   font-weight: 600;
 }
 
+.stock-badge {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
 .stock-badge.low-stock {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.inactive {
   background-color: #fee2e2;
   color: #991b1b;
 }

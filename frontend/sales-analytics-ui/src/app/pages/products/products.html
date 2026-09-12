@@ -1,6 +1,7 @@
 <div class="products-page">
 
   <div class="page-header">
+
     <div>
       <h1>Products</h1>
       <p>Manage and view all products</p>
@@ -13,6 +14,7 @@
     >
       {{ loading ? 'Loading...' : 'Refresh' }}
     </button>
+
   </div>
 
   <div
@@ -47,42 +49,32 @@
         <tr>
           <th>ID</th>
           <th>Product Name</th>
+          <th>SKU</th>
           <th>Category</th>
           <th>Price</th>
-          <th>Stock</th>
+          <th>Stock Quantity</th>
+          <th>Status</th>
         </tr>
       </thead>
 
       <tbody>
 
         <tr *ngFor="let product of products">
+  <td>{{ product.id }}</td>
+  <td>{{ product.name }}</td>
+  <td>{{ product.sku }}</td>
+  <td>{{ getCategoryName(product.categoryId) }}</td>
+  <td>₹{{ product.price }}</td>
+  <td>{{ product.stockQuantity }}</td>
 
-          <td>
-            {{ product.id }}
-          </td>
-
-          <td>
-            {{ product.name }}
-          </td>
-
-          <td>
-            {{ product.category }}
-          </td>
-
-          <td>
-            ₹{{ product.price }}
-          </td>
-
-          <td>
-            <span
-              class="stock-badge"
-              [class.low-stock]="product.stock < 10"
-            >
-              {{ product.stock }}
-            </span>
-          </td>
-
-        </tr>
+  <td>
+    <span
+      [class.active]="product.active"
+      [class.inactive]="!product.active">
+      {{ product.active ? 'Active' : 'Inactive' }}
+    </span>
+  </td>
+</tr>
 
       </tbody>
 

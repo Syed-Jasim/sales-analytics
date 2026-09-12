@@ -1,1 +1,79 @@
-<p>sales works!</p>
+<div class="sales-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Sales</h1>
+      <p>View all sales and transaction details</p>
+    </div>
+
+    <button class="refresh-btn" (click)="refreshSales()">
+      Refresh
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="message">
+    Loading sales...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage" class="table-container">
+
+    <table>
+      <thead>
+        <tr>
+          <th>Sale ID</th>
+          <th>Customer</th>
+          <th>Sale Date</th>
+          <th>Total Amount</th>
+          <th>Products</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let sale of sales">
+          <td>{{ sale.id }}</td>
+
+          <td>
+            <strong>{{ getCustomerName(sale.customerId) }}</strong>
+          </td>
+
+          <td>
+            {{ sale.saleDate | date:'dd MMM yyyy, hh:mm a' }}
+          </td>
+
+          <td class="amount">
+            ₹{{ sale.totalAmount | number:'1.2-2' }}
+          </td>
+
+          <td>
+            <div class="product-list">
+              <div
+                class="product-item"
+                *ngFor="let item of sale.saleItems">
+
+                <strong>
+                  {{ getProductName(item.productId) }}
+                </strong>
+
+                <span>
+                  {{ item.quantity }} ×
+                  ₹{{ item.unitPrice | number:'1.2-2' }}
+                </span>
+
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="sales.length === 0" class="message">
+      No sales found.
+    </p>
+
+  </div>
+
+</div>
