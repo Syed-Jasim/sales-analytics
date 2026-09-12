@@ -12,6 +12,11 @@ import {
   provideHttpClient
 } from '@angular/common/http';
 
+import {
+  provideCharts,
+  withDefaultRegisterables
+} from 'ng2-charts';
+
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -24,6 +29,8 @@ export const appConfig: ApplicationConfig = {
 
     provideRouter(routes),
 
-    provideHttpClient()
+    provideHttpClient(),
+
+    provideCharts(withDefaultRegisterables())
   ]
 };

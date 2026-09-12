@@ -43,4 +43,22 @@
 
   </div>
 
+  <div class="chart-section">
+
+  <div class="chart-header">
+    <h2>Revenue Overview</h2>
+    <p>Revenue generated from sales</p>
+  </div>
+
+  <div class="chart-container">
+    <canvas
+      baseChart
+      [data]="revenueChartData"
+      [options]="revenueChartOptions"
+      type="bar">
+    </canvas>
+  </div>
+
+</div>
+
 </div>
