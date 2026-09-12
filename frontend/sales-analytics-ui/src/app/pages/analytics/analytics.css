@@ -1,0 +1,42 @@
+.analytics h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.analytics-card,
+.sales-section {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.analytics-card h3 {
+  color: #6b7280;
+  margin-top: 0;
+}
+
+.analytics-card p {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.sales-section {
+  margin-top: 25px;
+}
+
+.sales-section h2 {
+  margin-top: 0;
+}

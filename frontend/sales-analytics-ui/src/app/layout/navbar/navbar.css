@@ -1,0 +1,13 @@
+.navbar {
+  height: 60px;
+  background: #1f2937;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+}
+
+.navbar h2 {
+  margin: 0;
+}
