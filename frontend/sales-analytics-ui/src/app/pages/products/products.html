@@ -1,1 +1,93 @@
-<p>products works!</p>
+<div class="products-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Products</h1>
+      <p>Manage and view all products</p>
+    </div>
+
+    <button
+      class="refresh-button"
+      (click)="refreshProducts()"
+      [disabled]="loading"
+    >
+      {{ loading ? 'Loading...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div
+    class="error-message"
+    *ngIf="errorMessage"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <div
+    class="loading-message"
+    *ngIf="loading"
+  >
+    Loading products...
+  </div>
+
+  <div
+    class="empty-message"
+    *ngIf="!loading && products.length === 0 && !errorMessage"
+  >
+    No products found.
+  </div>
+
+  <div
+    class="table-container"
+    *ngIf="!loading && products.length > 0"
+  >
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let product of products">
+
+          <td>
+            {{ product.id }}
+          </td>
+
+          <td>
+            {{ product.name }}
+          </td>
+
+          <td>
+            {{ product.category }}
+          </td>
+
+          <td>
+            ₹{{ product.price }}
+          </td>
+
+          <td>
+            <span
+              class="stock-badge"
+              [class.low-stock]="product.stock < 10"
+            >
+              {{ product.stock }}
+            </span>
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
