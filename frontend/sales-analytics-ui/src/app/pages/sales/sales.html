@@ -1,0 +1,227 @@
+<div class="sales-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Sales</h1>
+      <p>View and manage your sales transactions</p>
+    </div>
+  </div>
+
+  <div class="summary-cards">
+
+    <div class="summary-card blue-card">
+      <div class="summary-label">
+        Filtered Sales
+      </div>
+
+      <div class="summary-value">
+        {{ totalSales }}
+      </div>
+    </div>
+
+    <div class="summary-card green-card">
+      <div class="summary-label">
+        Filtered Revenue
+      </div>
+
+      <div class="summary-value">
+        ₹{{ totalRevenue | number:'1.2-2' }}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="filters-card">
+
+    <div class="filters-header">
+      <h2>Filter Sales</h2>
+
+      <button
+        class="clear-button"
+        type="button"
+        (click)="clearFilters()">
+
+        Clear Filters
+
+      </button>
+    </div>
+
+    <div class="filters-grid">
+
+      <div class="filter-group">
+
+        <label for="search">
+          Search
+        </label>
+
+        <input
+          id="search"
+          type="text"
+          placeholder="Search by sale ID or customer"
+          [(ngModel)]="searchText"
+          (input)="applyFilters()" />
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="customer">
+          Customer
+        </label>
+
+        <select
+          id="customer"
+          [(ngModel)]="selectedCustomerId"
+          (change)="applyFilters()">
+
+          <option value="">
+            All Customers
+          </option>
+
+          <option
+            *ngFor="let customer of customers"
+            [value]="customer.id">
+
+            {{ customer.name }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="date">
+          Sale Date
+        </label>
+
+        <input
+          id="date"
+          type="date"
+          [(ngModel)]="selectedDate"
+          (change)="applyFilters()" />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="sales-card">
+
+    <div class="table-header">
+
+      <div>
+        <h2>Sales Transactions</h2>
+        <p>
+          Showing {{ filteredSales.length }} sale(s)
+        </p>
+      </div>
+
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="filteredSales.length > 0">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Sale ID</th>
+            <th>Customer</th>
+            <th>Sale Date</th>
+            <th>Products</th>
+            <th>Total Amount</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr
+            *ngFor="let sale of filteredSales">
+
+            <td>
+              <span class="sale-id">
+                #{{ sale.id }}
+              </span>
+            </td>
+
+            <td>
+              <div class="customer-name">
+                {{ getCustomerName(sale.customerId) }}
+              </div>
+            </td>
+
+            <td>
+              {{ sale.saleDate | date:'dd MMM yyyy, hh:mm a' }}
+            </td>
+
+            <td>
+
+              <div class="product-list">
+
+                <div
+                  class="product-item"
+                  *ngFor="let item of getSaleItems(sale)">
+
+                  <span class="product-name">
+                    {{ getProductName(item.productId) }}
+                  </span>
+
+                  <span class="product-details">
+                    {{ item.quantity }} ×
+                    ₹{{ item.unitPrice | number:'1.2-2' }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <td>
+              <span class="amount">
+                ₹{{ sale.totalAmount | number:'1.2-2' }}
+              </span>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div
+      class="empty-state"
+      *ngIf="filteredSales.length === 0">
+
+      <div class="empty-icon">
+        🧾
+      </div>
+
+      <h3>No sales found</h3>
+
+      <p>
+        Try changing your filters or clear them to see all sales.
+      </p>
+
+      <button
+        type="button"
+        class="empty-button"
+        (click)="clearFilters()">
+
+        Clear Filters
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

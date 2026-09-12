@@ -1,0 +1,482 @@
+<div class="products-page">
+
+  <div class="page-header">
+
+    <div>
+      <h1>Products</h1>
+      <p>Manage your products and inventory</p>
+    </div>
+
+    <button
+      type="button"
+      class="add-product-button"
+      (click)="openProductForm()">
+
+      + Add Product
+
+    </button>
+
+  </div>
+
+  <div
+    class="message success-message"
+    *ngIf="successMessage">
+
+    {{ successMessage }}
+
+  </div>
+
+  <div
+    class="message error-message"
+    *ngIf="errorMessage">
+
+    {{ errorMessage }}
+
+  </div>
+
+  <div
+    class="product-form-card"
+    *ngIf="showProductForm">
+
+    <div class="form-header">
+
+      <div>
+        <h2>Add New Product</h2>
+        <p>Enter the product details below</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeProductForm()">
+
+        ×
+
+      </button>
+
+    </div>
+
+    <form
+      #productForm="ngForm"
+      (ngSubmit)="saveProduct()">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label for="productName">
+            Product Name
+          </label>
+
+          <input
+            id="productName"
+            type="text"
+            name="productName"
+            placeholder="Enter product name"
+            [(ngModel)]="newProduct.name"
+            required />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="productSku">
+            SKU
+          </label>
+
+          <input
+            id="productSku"
+            type="text"
+            name="productSku"
+            placeholder="Enter SKU"
+            [(ngModel)]="newProduct.sku"
+            required />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="productPrice">
+            Price
+          </label>
+
+          <input
+            id="productPrice"
+            type="number"
+            name="productPrice"
+            placeholder="Enter price"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="newProduct.price"
+            required />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="productStock">
+            Stock Quantity
+          </label>
+
+          <input
+            id="productStock"
+            type="number"
+            name="productStock"
+            placeholder="Enter stock quantity"
+            min="0"
+            step="1"
+            [(ngModel)]="newProduct.stockQuantity"
+            required />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="productCategory">
+            Category
+          </label>
+
+          <select
+            id="productCategory"
+            name="productCategory"
+            [(ngModel)]="newProduct.categoryId"
+            required>
+
+            <option [ngValue]="0">
+              Select Category
+            </option>
+
+            <option
+              *ngFor="let category of categories"
+              [ngValue]="category.id">
+
+              {{ category.name }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="form-group active-group">
+
+          <label for="productActive">
+            Product Status
+          </label>
+
+          <label class="checkbox-label">
+
+            <input
+              id="productActive"
+              type="checkbox"
+              name="productActive"
+              [(ngModel)]="newProduct.active" />
+
+            Active Product
+
+          </label>
+
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeProductForm()">
+
+          Cancel
+
+        </button>
+
+        <button
+          type="submit"
+          class="save-button"
+          [disabled]="isSaving || productForm.invalid">
+
+          <span *ngIf="!isSaving">
+            Save Product
+          </span>
+
+          <span *ngIf="isSaving">
+            Saving...
+          </span>
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="summary-cards">
+
+    <div class="summary-card blue-card">
+
+      <div class="summary-label">
+        Total Products
+      </div>
+
+      <div class="summary-value">
+        {{ totalProducts }}
+      </div>
+
+    </div>
+
+    <div class="summary-card green-card">
+
+      <div class="summary-label">
+        Inventory Value
+      </div>
+
+      <div class="summary-value">
+        ₹{{ totalInventoryValue | number:'1.2-2' }}
+      </div>
+
+    </div>
+
+    <div class="summary-card orange-card">
+
+      <div class="summary-label">
+        Low Stock Products
+      </div>
+
+      <div class="summary-value">
+        {{ lowStockProducts }}
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="filters-card">
+
+    <div class="filters-header">
+
+      <h2>Filter Products</h2>
+
+      <button
+        type="button"
+        class="clear-button"
+        (click)="clearFilters()">
+
+        Clear Filters
+
+      </button>
+
+    </div>
+
+    <div class="filters-grid">
+
+      <div class="filter-group">
+
+        <label for="search">
+          Search
+        </label>
+
+        <input
+          id="search"
+          type="text"
+          placeholder="Search by product name or SKU"
+          [(ngModel)]="searchText"
+          (input)="applyFilters()" />
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="category">
+          Category
+        </label>
+
+        <select
+          id="category"
+          [(ngModel)]="selectedCategoryId"
+          (change)="applyFilters()">
+
+          <option value="">
+            All Categories
+          </option>
+
+          <option
+            *ngFor="let category of categories"
+            [value]="category.id">
+
+            {{ category.name }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="filter-group">
+
+        <label for="stockStatus">
+          Stock Status
+        </label>
+
+        <select
+          id="stockStatus"
+          [(ngModel)]="selectedStockStatus"
+          (change)="applyFilters()">
+
+          <option value="">
+            All Stock Status
+          </option>
+
+          <option value="IN_STOCK">
+            In Stock
+          </option>
+
+          <option value="LOW_STOCK">
+            Low Stock
+          </option>
+
+          <option value="OUT_OF_STOCK">
+            Out of Stock
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="products-card">
+
+    <div class="table-header">
+
+      <div>
+        <h2>Product Inventory</h2>
+
+        <p>
+          Showing {{ filteredProducts.length }} product(s)
+        </p>
+      </div>
+
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="filteredProducts.length > 0">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Inventory Value</th>
+            <th>Status</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr
+            *ngFor="let product of filteredProducts">
+
+            <td>
+
+              <div class="product-name">
+                {{ product.name }}
+              </div>
+
+            </td>
+
+            <td>
+
+              <span class="sku">
+                {{ product.sku }}
+              </span>
+
+            </td>
+
+            <td>
+              {{ getCategoryName(product.categoryId) }}
+            </td>
+
+            <td>
+              ₹{{ product.price | number:'1.2-2' }}
+            </td>
+
+            <td>
+
+              <span
+                class="stock-quantity"
+                [class.low-stock-text]="product.stockQuantity <= 5"
+                [class.out-stock-text]="product.stockQuantity === 0">
+
+                {{ product.stockQuantity }}
+
+              </span>
+
+            </td>
+
+            <td>
+
+              ₹{{ product.price * product.stockQuantity | number:'1.2-2' }}
+
+            </td>
+
+            <td>
+
+              <span
+                class="status-badge"
+                [class.in-stock]="getStockStatus(product.stockQuantity) === 'IN_STOCK'"
+                [class.low-stock]="getStockStatus(product.stockQuantity) === 'LOW_STOCK'"
+                [class.out-of-stock]="getStockStatus(product.stockQuantity) === 'OUT_OF_STOCK'">
+
+                {{ getStockLabel(product.stockQuantity) }}
+
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div
+      class="empty-state"
+      *ngIf="filteredProducts.length === 0">
+
+      <div class="empty-icon">
+        📦
+      </div>
+
+      <h3>No products found</h3>
+
+      <p>
+        Try changing your filters or clear them to see all products.
+      </p>
+
+      <button
+        type="button"
+        class="empty-button"
+        (click)="clearFilters()">
+
+        Clear Filters
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
