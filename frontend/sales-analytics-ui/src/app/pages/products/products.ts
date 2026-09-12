@@ -1,17 +1,11 @@
 import {
+  ChangeDetectorRef,
   Component,
-  OnInit,
-  ChangeDetectorRef
+  OnInit
 } from '@angular/core';
 
-import {
-  CommonModule,
-  DecimalPipe
-} from '@angular/common';
-
-import {
-  FormsModule
-} from '@angular/forms';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import {
   ProductsService,
@@ -35,7 +29,6 @@ export class Products implements OnInit {
 
   products: Product[] = [];
   filteredProducts: Product[] = [];
-
   categories: Category[] = [];
 
   searchText = '';
@@ -43,12 +36,14 @@ export class Products implements OnInit {
   selectedStockStatus = '';
 
   totalProducts = 0;
-  totalInventoryValue = 0;
+  totalStock = 0;
   lowStockProducts = 0;
+  outOfStockProducts = 0;
 
   showProductForm = false;
-
   isSaving = false;
+
+  editingProductId: number | null = null;
 
   successMessage = '';
   errorMessage = '';
@@ -74,62 +69,60 @@ export class Products implements OnInit {
 
   loadProducts(): void {
     this.productsService.getProducts().subscribe({
-      next: (products: Product[]) => {
-        this.products = products;
-        this.filteredProducts = [...products];
-
-        this.calculateSummary();
-
+      next: (data) => {
+        this.products = data;
+        this.applyFilters();
         this.cdr.detectChanges();
       },
-
-      error: (error) => {
-        console.error(
-          'Products loading error:',
-          error
-        );
-
-        this.errorMessage =
-          'Unable to load products.';
+      error: () => {
+        this.errorMessage = 'Unable to load products.';
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadCategories(): void {
     this.productsService.getCategories().subscribe({
-      next: (categories: Category[]) => {
-        this.categories = categories;
-
+      next: (data) => {
+        this.categories = data;
         this.cdr.detectChanges();
       },
-
-      error: (error) => {
-        console.error(
-          'Categories loading error:',
-          error
-        );
-
-        this.errorMessage =
-          'Unable to load categories.';
+      error: () => {
+        this.errorMessage = 'Unable to load categories.';
+        this.cdr.detectChanges();
       }
     });
   }
 
   openProductForm(): void {
-    this.showProductForm = true;
+    this.editingProductId = null;
+    this.resetProductForm();
 
+    this.showProductForm = true;
     this.successMessage = '';
     this.errorMessage = '';
+  }
 
-    this.resetProductForm();
+  openEditForm(product: Product): void {
+    this.editingProductId = product.id;
+
+    this.newProduct = {
+      name: product.name,
+      sku: product.sku,
+      price: product.price,
+      stockQuantity: product.stockQuantity,
+      active: product.active,
+      categoryId: product.categoryId
+    };
+
+    this.showProductForm = true;
+    this.successMessage = '';
+    this.errorMessage = '';
   }
 
   closeProductForm(): void {
     this.showProductForm = false;
-
-    this.successMessage = '';
-    this.errorMessage = '';
-
+    this.editingProductId = null;
     this.resetProductForm();
   }
 
@@ -148,78 +141,95 @@ export class Products implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    if (
-      !this.newProduct.name.trim() ||
-      !this.newProduct.sku.trim()
-    ) {
-      this.errorMessage =
-        'Product name and SKU are required.';
-
+    if (!this.newProduct.name.trim()) {
+      this.errorMessage = 'Product name is required.';
       return;
     }
 
-    if (
-      this.newProduct.price <= 0 ||
-      this.newProduct.stockQuantity < 0 ||
-      this.newProduct.categoryId <= 0
-    ) {
-      this.errorMessage =
-        'Please enter valid product details.';
-
+    if (!this.newProduct.sku.trim()) {
+      this.errorMessage = 'SKU is required.';
       return;
     }
 
-    const productRequest: ProductRequest = {
-      name: this.newProduct.name.trim(),
-      sku: this.newProduct.sku.trim(),
-      price: Number(this.newProduct.price),
-      stockQuantity: Number(
-        this.newProduct.stockQuantity
-      ),
-      active: this.newProduct.active,
-      categoryId: Number(
-        this.newProduct.categoryId
-      )
-    };
+    if (this.newProduct.price <= 0) {
+      this.errorMessage = 'Price must be greater than zero.';
+      return;
+    }
+
+    if (this.newProduct.stockQuantity < 0) {
+      this.errorMessage = 'Stock quantity cannot be negative.';
+      return;
+    }
+
+    if (!this.newProduct.categoryId) {
+      this.errorMessage = 'Please select a category.';
+      return;
+    }
 
     this.isSaving = true;
 
-    this.productsService
-      .createProduct(productRequest)
-      .subscribe({
+    if (this.editingProductId !== null) {
+      this.updateExistingProduct();
+    } else {
+      this.createNewProduct();
+    }
+  }
 
-        next: (createdProduct: Product) => {
-          this.products = [
-            ...this.products,
-            createdProduct
-          ];
+  private createNewProduct(): void {
+    this.productsService.createProduct(this.newProduct).subscribe({
+      next: (createdProduct) => {
+        this.products = [
+          ...this.products,
+          createdProduct
+        ];
+
+        this.applyFilters();
+
+        this.isSaving = false;
+        this.showProductForm = false;
+        this.editingProductId = null;
+
+        this.resetProductForm();
+
+        this.successMessage = 'Product added successfully.';
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isSaving = false;
+        this.errorMessage = 'Unable to add product.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private updateExistingProduct(): void {
+    this.productsService
+      .updateProduct(
+        this.editingProductId!,
+        this.newProduct
+      )
+      .subscribe({
+        next: (updatedProduct) => {
+          this.products = this.products.map(product =>
+            product.id === updatedProduct.id
+              ? updatedProduct
+              : product
+          );
 
           this.applyFilters();
 
           this.isSaving = false;
-
           this.showProductForm = false;
-
-          this.successMessage =
-            'Product added successfully.';
+          this.editingProductId = null;
 
           this.resetProductForm();
 
+          this.successMessage = 'Product updated successfully.';
           this.cdr.detectChanges();
         },
-
-        error: (error) => {
-          console.error(
-            'Product creation error:',
-            error
-          );
-
+        error: () => {
           this.isSaving = false;
-
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to create product. Please try again.';
-
+          this.errorMessage = 'Unable to update product.';
           this.cdr.detectChanges();
         }
       });
@@ -230,32 +240,26 @@ export class Products implements OnInit {
       .trim()
       .toLowerCase();
 
-    this.filteredProducts = this.products.filter(
-      (product: Product) => {
+    this.filteredProducts = this.products.filter(product => {
+      const matchesSearch =
+        !search ||
+        product.name.toLowerCase().includes(search) ||
+        product.sku.toLowerCase().includes(search);
 
-        const matchesSearch =
-          !search ||
-          product.name.toLowerCase().includes(search) ||
-          product.sku.toLowerCase().includes(search);
+      const matchesCategory =
+        !this.selectedCategoryId ||
+        product.categoryId.toString() === this.selectedCategoryId;
 
-        const matchesCategory =
-          !this.selectedCategoryId ||
-          product.categoryId.toString() ===
-            this.selectedCategoryId;
+      const matchesStock =
+        !this.selectedStockStatus ||
+        this.getStockStatus(product) === this.selectedStockStatus;
 
-        const matchesStockStatus =
-          !this.selectedStockStatus ||
-          this.getStockStatus(
-            product.stockQuantity
-          ) === this.selectedStockStatus;
-
-        return (
-          matchesSearch &&
-          matchesCategory &&
-          matchesStockStatus
-        );
-      }
-    );
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesStock
+      );
+    });
 
     this.calculateSummary();
   }
@@ -265,65 +269,56 @@ export class Products implements OnInit {
     this.selectedCategoryId = '';
     this.selectedStockStatus = '';
 
-    this.filteredProducts = [
-      ...this.products
-    ];
-
-    this.calculateSummary();
+    this.applyFilters();
   }
 
   calculateSummary(): void {
-    this.totalProducts =
-      this.filteredProducts.length;
+    this.totalProducts = this.products.length;
 
-    this.totalInventoryValue =
-      this.filteredProducts.reduce(
-        (total, product) =>
-          total +
-          Number(product.price) *
-          Number(product.stockQuantity),
-        0
-      );
+    this.totalStock = this.products.reduce(
+      (total, product) =>
+        total + product.stockQuantity,
+      0
+    );
 
-    this.lowStockProducts =
-      this.filteredProducts.filter(
-        (product) =>
-          product.stockQuantity <= 5
-      ).length;
+    this.lowStockProducts = this.products.filter(
+      product =>
+        product.stockQuantity > 0 &&
+        product.stockQuantity <= 5
+    ).length;
+
+    this.outOfStockProducts = this.products.filter(
+      product =>
+        product.stockQuantity === 0
+    ).length;
   }
 
   getCategoryName(categoryId: number): string {
     const category = this.categories.find(
-      (category) =>
-        category.id === categoryId
+      item => item.id === categoryId
     );
 
-    return category
-      ? category.name
-      : `Category #${categoryId}`;
+    return category ? category.name : 'Unknown';
   }
 
-  getStockStatus(stockQuantity: number): string {
-    if (stockQuantity === 0) {
-      return 'OUT_OF_STOCK';
+  getStockStatus(product: Product): string {
+    if (product.stockQuantity === 0) {
+      return 'out';
     }
 
-    if (stockQuantity <= 5) {
-      return 'LOW_STOCK';
+    if (product.stockQuantity <= 5) {
+      return 'low';
     }
 
-    return 'IN_STOCK';
+    return 'in';
   }
 
-  getStockLabel(stockQuantity: number): string {
-    const status =
-      this.getStockStatus(stockQuantity);
-
-    if (status === 'OUT_OF_STOCK') {
+  getStockLabel(product: Product): string {
+    if (product.stockQuantity === 0) {
       return 'Out of Stock';
     }
 
-    if (status === 'LOW_STOCK') {
+    if (product.stockQuantity <= 5) {
       return 'Low Stock';
     }
 

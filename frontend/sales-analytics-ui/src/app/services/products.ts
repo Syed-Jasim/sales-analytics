@@ -18,6 +18,15 @@ export interface Category {
   description?: string;
 }
 
+export interface ProductRequest {
+  name: string;
+  sku: string;
+  price: number;
+  stockQuantity: number;
+  active: boolean;
+  categoryId: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,20 +38,14 @@ export class ProductsService {
   private readonly categoriesUrl =
     'http://localhost:8080/api/categories';
 
-  constructor(
-    private http: HttpClient
-  ) {}
+  constructor(private http: HttpClient) {}
 
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(
-      this.productsUrl
-    );
+    return this.http.get<Product[]>(this.productsUrl);
   }
 
   getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(
-      this.categoriesUrl
-    );
+    return this.http.get<Category[]>(this.categoriesUrl);
   }
 
   createProduct(product: ProductRequest): Observable<Product> {
@@ -51,13 +54,14 @@ export class ProductsService {
       product
     );
   }
-}
 
-export interface ProductRequest {
-  name: string;
-  sku: string;
-  price: number;
-  stockQuantity: number;
-  active: boolean;
-  categoryId: number;
+  updateProduct(
+    id: number,
+    product: ProductRequest
+  ): Observable<Product> {
+    return this.http.put<Product>(
+      `${this.productsUrl}/${id}`,
+      product
+    );
+  }
 }
